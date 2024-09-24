@@ -31,8 +31,23 @@ interface Attendee {
 }
 
 export function AttendeeList() {
-  const [InputValue, setValueInput] = useState('')
-  const [page, setPage] = useState(1)
+  const [InputValue, setValueInput] = useState(() => {
+    const url = new URL(window.location.toString())
+
+    if (url.searchParams.has('name')) {
+      return url.searchParams.get('name') || ''
+    }
+
+    return ''
+  })
+  const [page, setPage] = useState(() => {
+    const url = new URL(window.location.toString())
+    if (url.searchParams.has('page')) {
+      return Number(url.searchParams.get('page'))
+    }
+
+    return 1
+  })
   const [totalAttendee, setTotalAttendee] = useState(10)
 
   const [attendees, setAttendees] = useState<Attendee[]>([])
@@ -53,12 +68,44 @@ export function AttendeeList() {
       })
   }, [page, InputValue])
 
+  useEffect(() => {
+    setCurrentName(InputValue)
+  }, [InputValue])
+
+  useEffect(() => {
+    setCurrentPage(page)
+  }, [page])
+
+  function setCurrentName(InputValue: string) {
+    const url = new URL(window.location.toString())
+
+    if (InputValue !== '') {
+      url.searchParams.set('name', InputValue)
+    } else {
+      url.searchParams.delete('name')
+    }
+
+    window.history.pushState({}, '', url)
+  }
+
+  function setCurrentPage(page: number) {
+    const url = new URL(window.location.toString())
+
+    if (page !== 1) {
+      url.searchParams.set('page', String(page))
+    } else {
+      url.searchParams.delete('page')
+    }
+
+    window.history.pushState({}, '', url)
+  }
+
   function onSearchInputChanged(event: ChangeEvent<HTMLInputElement>) {
     setValueInput(event.target.value)
     setPage(1)
   }
   function goToNextPage() {
-    page < Math.ceil(totalAttendee / 10) && setPage(page + 1)
+    setPage(page + 1)
   }
   function goToInitialPage() {
     setPage(1)
@@ -84,6 +131,7 @@ export function AttendeeList() {
             type="text"
             placeholder="Buscar participante"
             onChange={onSearchInputChanged}
+            value={InputValue}
           />
 
           {/* <Input placeholder="Buscar participante" /> */}
