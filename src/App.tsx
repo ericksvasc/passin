@@ -1,11 +1,16 @@
-import { AttendeeList } from './components/attendee-list'
-import { Header } from './components/header'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { Attendees } from './pages/attendees'
+import { NotFound } from './pages/notFound'
+import { Events } from './pages/events'
 
 export function App() {
   return (
-    <div className="max-w-[1216px] mx-auto py-5 flex flex-col gap-5">
-      <Header />
-      <AttendeeList />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="*" element={<NotFound />} />
+        <Route path="/" element={<Attendees />} />
+        <Route path="/events" element={<Events />} />
+      </Routes>
+    </BrowserRouter>
   )
 }

@@ -7,7 +7,7 @@ import {
   MoreHorizontal,
   Search,
 } from 'lucide-react'
-// import { Input } from '../ui/input'
+
 import { CheckboxIndicator, CheckboxRoot } from './ui/checkbox'
 import { IconButton } from './ui/button'
 import { Table } from './table/table'
@@ -18,6 +18,7 @@ import { type ChangeEvent, useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import ptBR from 'dayjs/locale/pt-br'
+import { env } from '../env'
 
 dayjs.extend(relativeTime)
 dayjs.locale(ptBR)
@@ -29,6 +30,10 @@ interface Attendee {
   createdAt: string
   checkInDate: string | null
 }
+
+// interface AttendeeTableProps {
+//   attendees: Attendee[]
+// }
 
 export function AttendeeList() {
   const [InputValue, setValueInput] = useState(() => {
@@ -54,7 +59,7 @@ export function AttendeeList() {
 
   useEffect(() => {
     const url = new URL(
-      'http://localhost:5273/events/hr0e68xev2zkbuh71mai0szz/ateendees'
+      `${env.databaseUrl}/events/hr0e68xev2zkbuh71mai0szz/ateendees`
     )
     url.searchParams.set('pageIndex', String(page - 1))
     if (InputValue.length > 0) {
@@ -119,6 +124,27 @@ export function AttendeeList() {
 
   const lastPage = Math.ceil(totalAttendee / 10)
 
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+
+  const handleSelect = (id: number) => {
+    const stringId = id.toString() // Converte o id para string
+    if (selectedIds.includes(stringId)) {
+      setSelectedIds(selectedIds.filter(selectedId => selectedId !== stringId))
+    } else {
+      setSelectedIds([...selectedIds, stringId])
+    }
+  }
+
+  useEffect(() => {
+    console.log('Deletar IDs:', selectedIds)
+  }, [selectedIds])
+
+  // const handleDelete = () => {
+  //   // Lógica para deletar os itens selecionados
+  //   console.log('Deletar IDs:', selectedIds)
+  //   // Aqui você pode chamar a API para deletar os itens ou atualizar o estado dos dados
+  // }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex gap-3 items-center">
@@ -133,14 +159,11 @@ export function AttendeeList() {
             onChange={onSearchInputChanged}
             value={InputValue}
           />
-
-          {/* <Input placeholder="Buscar participante" /> */}
         </div>
       </div>
 
       {/* Tabela de participantes */}
 
-      {/* <div className="rounded-lg border border-white/10"> */}
       <Table>
         <thead>
           <tr className="border-b border-white/10 h-16">
@@ -166,7 +189,10 @@ export function AttendeeList() {
                 className="border-b border-white/10 text-zinc-300 hover:bg-zinc-50/5 transition-opacity duration-1000 ease-in-out"
               >
                 <TableCel>
-                  <CheckboxRoot>
+                  <CheckboxRoot
+                    onCheckedChange={() => handleSelect(dataE.id)}
+                    // checked={selectedIds.includes(dataE.id.toString())} // Converte o número para string
+                  >
                     <CheckboxIndicator>
                       <CheckIcon size={14} strokeWidth={3} />
                     </CheckboxIndicator>

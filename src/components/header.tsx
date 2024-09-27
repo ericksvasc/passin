@@ -7,7 +7,7 @@ export function Header() {
       <img src={Logo} alt="" />
 
       <nav className="flex gap-5 items-center font-medium text-sm">
-        <NavLink href="/" variant="active">
+        <NavLink href="/events" variant="active">
           Eventos
         </NavLink>
 
