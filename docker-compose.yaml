@@ -1,23 +1,19 @@
-version: '3.8'
+# version: '3.8'
 services:
 
-  passInApp:
-    build: .
+  passinapp:
+    image: ericksvasc/passin:1.0.0
+    # build: .
+    ports:
+      - 4173:4173
     environment:
       VITE_APP_DATABASE_URL: ${VITE_APP_DATABASE_URL}
     env_file:
       - .env
-    networks:
-      - serverapi
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.apiserver.rule=Host(`apiserver.ericksvasc.com`) ## Url do Dify
-      - traefik.http.routers.apiserver.entrypoints=websecure
-      - traefik.http.routers.apiserver.tls.certresolver=leresolver
-      - traefik.http.services.apiserver.loadbalancer.server.port=4173
-      - traefik.http.routers.apiserver.service=apiserver
+    # networks:
+    #   - serverapi
 
-networks:
-  serverapi:
-    external: true
+# networks:
+#   serverapi:
+#     external: 
 

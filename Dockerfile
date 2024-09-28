@@ -3,12 +3,8 @@ FROM node:20.17.0-alpine AS build
 
 WORKDIR /app
 
-# Copia package.json e package-lock.json para instalar as dependências
-COPY package*.json ./
-COPY .env ./
-COPY src ./ 
-
 # Instala dependências
+COPY package*.json ./
 RUN npm install
 
 # Copia o restante dos arquivos da aplicação
@@ -26,10 +22,11 @@ WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 
-COPY . .
+COPY package*.json ./
+COPY .env ./
 
 # Expõe a porta usada pela aplicação
 EXPOSE 4173
 
 # Comando para iniciar a aplicação
-CMD ["npm", "run", "preview"]
+CMD ["npm", "run", "preview", "--", "--host"]

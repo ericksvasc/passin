@@ -58,6 +58,11 @@ export function AttendeeList() {
   const [attendees, setAttendees] = useState<Attendee[]>([])
 
   useEffect(() => {
+    if (!env.databaseUrl) {
+      console.error('Database URL is not defined')
+      return
+    }
+
     const url = new URL(
       `${env.databaseUrl}/events/hr0e68xev2zkbuh71mai0szz/ateendees`
     )
