@@ -19,6 +19,9 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import ptBR from 'dayjs/locale/pt-br'
 import { env } from '../env'
+import { DialogTrigger } from './ui/dialog'
+import { AttendeeEditDialog } from './attendee-edit-dialog'
+import { EditAttendee } from './attendee-edit-dialo2'
 
 dayjs.extend(relativeTime)
 dayjs.locale(ptBR)
@@ -36,6 +39,8 @@ interface Attendee {
 // }
 
 export function AttendeeList() {
+  const [attendeeEdit, setAttendeeEdit] = useState<Attendee | null>(null)
+
   const [InputValue, setValueInput] = useState(() => {
     const url = new URL(window.location.toString())
 
@@ -152,6 +157,8 @@ export function AttendeeList() {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* {attendeeEdit ? <AttendeeEditDialog attendee={attendeeEdit} /> : null} */}
+      {attendeeEdit ? <EditAttendee attendee={attendeeEdit} /> : null}
       <div className="flex gap-3 items-center">
         <h1 className="text-2xl font-bold">Participantes</h1>
 
@@ -221,9 +228,16 @@ export function AttendeeList() {
                   )}
                 </TableCel>
                 <TableCel>
-                  <IconButton>
-                    <MoreHorizontal size={16} />
-                  </IconButton>
+                  <DialogTrigger
+                    onClick={() => {
+                      setAttendeeEdit(dataE)
+                    }}
+                    asChild
+                  >
+                    <IconButton>
+                      <MoreHorizontal size={16} />
+                    </IconButton>
+                  </DialogTrigger>
                 </TableCel>
               </tr>
             )
