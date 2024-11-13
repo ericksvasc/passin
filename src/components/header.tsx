@@ -1,5 +1,5 @@
+import { Link } from 'react-router-dom'
 import Logo from '../assets/logo.svg'
-import { NavLink } from './ui/nav-link-'
 
 export function Header() {
   return (
@@ -7,11 +7,15 @@ export function Header() {
       <img src={Logo} alt="" />
 
       <nav className="flex gap-5 items-center font-medium text-sm">
-        <NavLink href="/events" variant="active">
-          Eventos
-        </NavLink>
+        <Link to="/events">
+          <div>Eventos</div>
+        </Link>
 
-        <NavLink href="/">Participantes</NavLink>
+        {/* <Link to="/">
+          <div>Participantes</div>
+        </Link> */}
+
+        {/* <NavLink href="/">Participantes</NavLink> */}
       </nav>
     </div>
   )

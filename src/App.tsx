@@ -1,16 +1,15 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { Attendees } from './pages/attendees'
-import { NotFound } from './pages/notFound'
-import { Events } from './pages/events'
+import { RouterProvider } from 'react-router-dom'
+import { router } from './routes'
 
 export function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="*" element={<NotFound />} />
-        <Route path="/" element={<Attendees />} />
-        <Route path="/events" element={<Events />} />
-      </Routes>
-    </BrowserRouter>
+    <RouterProvider router={router} />
+    // <BrowserRouter>
+    //   <Routes>
+    //     <Route path="*" element={<NotFound />} />
+    //     <Route path="/" element={<Attendees />} />
+    //     <Route path="/events" element={<Events />} />
+    //   </Routes>
+    // </BrowserRouter>
   )
 }
