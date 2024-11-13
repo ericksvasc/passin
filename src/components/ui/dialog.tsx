@@ -1,6 +1,6 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { forwardRef } from 'react'
-import { ClassNameValue, twMerge } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 // import { twMerge } from 'tailwind-merge'
 
 export function Dialog(props: DialogPrimitive.DialogProps) {
