@@ -2,17 +2,17 @@ import { forwardRef, type ComponentProps } from 'react'
 import { tv, type VariantProps } from 'tailwind-variants'
 
 const button = tv({
-  base: 'border border-white/10 rounded-md p-1.5 transition-all duration-300 ',
+  base: 'border rounded-md p-1.5 transition-all duration-300 ',
 
   variants: {
     variant: {
-      baseB: 'bg-black/20',
-      left: 'bg-zinc-800/90',
-      right: 'bg-zinc-700/80',
+      baseB: 'bg-secondary',
+      left: 'bg-muted-foreground/20',
+      right: 'bg-muted-foreground/30',
     },
 
     disabled: {
-      true: 'opacity-70 cursor-not-allowed', // estilo para disabled
+      true: 'dark:opacity-70 opacity-60 cursor-not-allowed', // estilo para disabled
     },
   },
 

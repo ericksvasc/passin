@@ -10,8 +10,9 @@ import {
 import { useEffect } from 'react'
 import { attendeePatch } from '../../http/patchAttendee'
 import { useQueryClient } from '@tanstack/react-query'
-import { Input } from '../ui/input'
 import type { AttendeeResponse } from '../../http/get-attendee'
+import { Input } from '../theme/ui/input'
+import { Button } from '../theme/ui/button'
 
 const editAttendeeForm = z.object({
   name: z
@@ -122,32 +123,30 @@ export function EditAttendee({
   }, [attendee, reset])
 
   return (
-    <DialogContent className="w-[440px] h-[380px] border border-white/20 bg-[#0d0b0a]">
-      <div className="flex flex-col h-full">
-        <DialogTitle className="mb-1 text-zinc-100">
-          Editar Participante
-        </DialogTitle>
-        <DialogDescription className="mb-8">
+    <DialogContent className="bg-muted w-[440px] h-[380px]">
+      <div className="flex flex-col h-full text-foreground">
+        <DialogTitle className="mb-1">Editar Participante</DialogTitle>
+        <DialogDescription className="mb-8 text-muted-foreground">
           Edite as informações necessárias e clique em salvar
         </DialogDescription>
         <form
           onSubmit={handleSubmit(handlePatchAteendee)}
           action=""
-          className="flex flex-col h-full"
+          className="flex flex-col h-full text-foreground"
         >
           <div className="flex flex-1 gap-6 flex-col">
-            <div className="flex gap-2 w-full items-center">
+            <div className="flex gap-2.5 w-full items-center">
               <label htmlFor="name" className="text-sm">
                 Nome:
               </label>
-              <div className="px-3 py-2.5 border border-orange-400/40 bg-transparent rounded-lg text-sm  gap-3 w-full focus-within:border-orange-400">
-                <Input
-                  id="name"
-                  placeholder="Nome Completo"
-                  {...register('name')}
-                  autoFocus
-                />
-              </div>
+              <Input
+                id="name"
+                placeholder="Nome Completo"
+                type="text"
+                className="bg-transparent border-primary/50"
+                {...register('name')}
+                autoFocus
+              />
               {/* {formState.errors.name && (
                 <p className="text-red-400 text-sm">
                   {formState.errors.name.message}
@@ -155,18 +154,17 @@ export function EditAttendee({
               )} */}
             </div>
 
-            <div className="flex gap-2 w-full items-center">
+            <div className="flex gap-2.5 w-full items-center">
               <label htmlFor="name" className="text-sm">
                 Email:
               </label>
-              <div className="w-full px-3 py-2.5 border border-orange-400/40 bg-transparent rounded-lg text-sm focus-within:border-orange-400">
-                <Input
-                  id="email"
-                  placeholder="Email válido"
-                  {...register('email')}
-                  type="email"
-                />
-              </div>
+              <Input
+                id="email"
+                placeholder="Email válido"
+                type="email"
+                className="bg-transparent border-primary/50"
+                {...register('email')}
+              />
             </div>
             {/* {formState.errors.email && (
               <p className="text-red-400 text-sm">
@@ -176,18 +174,19 @@ export function EditAttendee({
           </div>
 
           <div className="flex justify-end gap-5">
-            <DialogClose asChild className=" text-zinc-300">
-              <button type="button" onClick={() => reset()}>
+            <DialogClose asChild>
+              <Button
+                className="hover:bg-muted-foreground/5"
+                onClick={() => reset()}
+                variant={'secondary'}
+              >
                 Cancelar
-              </button>
+              </Button>
             </DialogClose>
 
-            <button
-              type="submit"
-              className="bg-orange-400 hover:bg-orange-400/90 text-zinc-900 px-4 py-1.5 rounded-[4px]"
-            >
+            <Button type="submit" variant={'default'} size={'lg'}>
               Salvar
-            </button>
+            </Button>
           </div>
         </form>
       </div>

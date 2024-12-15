@@ -1,15 +1,22 @@
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
+// import {
+//   DialogClose,
+//   DialogContent,
+//   DialogDescription,
+//   DialogTitle,
+// } from '../ui/dialog'
+import { useQueryClient } from '@tanstack/react-query'
+import { createAttendee } from '../../http/create-attendee'
+import { Button } from '../theme/ui/button'
+import { Input } from '../theme/ui/input'
 import {
   DialogClose,
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '../ui/dialog'
-import { useQueryClient } from '@tanstack/react-query'
-import { Input } from '../ui/input'
-import { createAttendee } from '../../http/create-attendee'
+} from '../theme/ui/dialog'
 
 const editAttendeeForm = z.object({
   name: z
@@ -65,13 +72,14 @@ export function CreateAttendeeDialog({
 
     queryClient.invalidateQueries({ queryKey: ['attendees', eventslug] })
     onCloseDialog()
+    reset()
   }
 
   return (
-    <DialogContent className="">
-      <div className="flex flex-col justify-between h-full">
+    <DialogContent className="bg-muted w-[600px] h-[400px]">
+      <div className="flex flex-col justify-between h-full text-foreground">
         <DialogTitle className="mb-1">Criar participante</DialogTitle>
-        <DialogDescription className="mb-6">
+        <DialogDescription className="mb-6 text-muted-foreground">
           Inclua as informações necessárias e clique em salvar
         </DialogDescription>
         <form
@@ -80,38 +88,38 @@ export function CreateAttendeeDialog({
           className="flex flex-col justify-between h-full"
         >
           <div className="flex flex-1 gap-6">
-            <div className="flex flex-col gap-2 w-full">
+            <div className="flex flex-col gap-2.5 w-full">
               <label htmlFor="name" className="text-sm">
                 Nome:
               </label>
-              <div className="px-3 py-1.5 border border-orange-400/20 bg-transparent rounded-lg text-sm  gap-3 ">
-                <Input
-                  id="name"
-                  placeholder="Nome Completo"
-                  {...register('name')}
-                  autoFocus
-                />
-              </div>
+
+              <Input
+                id="name"
+                placeholder="Nome completo"
+                {...register('name')}
+                autoFocus
+                className="bg-transparent dark:border-muted-foreground"
+              />
+
               {formState.errors.name && (
-                <p className="text-red-400 text-sm">
+                <p className="text-destructive text-sm">
                   {formState.errors.name.message}
                 </p>
               )}
             </div>
 
-            <div className="flex flex-col gap-2 w-full">
+            <div className="flex flex-col gap-2.5 w-full">
               <label htmlFor="name" className="text-sm">
                 Email:
               </label>
-              <div className="px-3 py-1.5 border border-orange-400/20 bg-transparent rounded-lg text-sm ">
-                <Input
-                  id="email"
-                  placeholder="Email válido"
-                  {...register('email')}
-                />
-              </div>
+              <Input
+                id="email"
+                {...register('email')}
+                placeholder="Email válido"
+                className="bg-transparent dark:border-muted-foreground"
+              />
               {formState.errors.email && (
-                <p className="text-red-400 text-sm">
+                <p className="text-destructive text-sm">
                   {formState.errors.email.message}
                 </p>
               )}
@@ -119,18 +127,22 @@ export function CreateAttendeeDialog({
           </div>
 
           <div className="flex justify-end gap-5">
-            <DialogClose asChild className=" text-zinc-300">
-              <button type="button" onClick={() => reset()}>
+            <DialogClose asChild>
+              {/* <button type="button" onClick={() => reset()}>
                 Cancelar
-              </button>
+              </button> */}
+              <Button
+                className="hover:bg-muted-foreground/5"
+                onClick={() => reset()}
+                variant={'secondary'}
+              >
+                Cancelar
+              </Button>
             </DialogClose>
 
-            <button
-              type="submit"
-              className="bg-orange-400 hover:bg-orange-400/90 text-zinc-900 px-4 py-1.5 rounded-[4px]"
-            >
+            <Button type="submit" variant={'default'} size={'lg'}>
               Salvar
-            </button>
+            </Button>
           </div>
         </form>
       </div>

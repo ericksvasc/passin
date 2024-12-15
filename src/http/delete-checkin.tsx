@@ -3,15 +3,17 @@ import { api } from '../lib/axios'
 import type { AttendeeResponse } from './get-attendee'
 
 interface DeleteCheckin {
-  attendeeId: number
+  attendeeIds: number[]
   slug: string
 }
 
 export async function deleteCheckin(
-  { attendeeId, slug }: DeleteCheckin,
+  { attendeeIds, slug }: DeleteCheckin,
   queryClient: QueryClient
 ) {
-  await api.delete(`/attendees/${slug}/${attendeeId}/check-in`)
+  await api.post(`/attendees/${slug}/check-in/delete`, {
+    attendeeIds,
+  })
 
   // queryClient.invalidateQueries({ queryKey: ['attendees'] })
 
@@ -29,13 +31,13 @@ export async function deleteCheckin(
     queryClient.setQueryData<AttendeeResponse>(cacheKey, {
       ...cacheData,
       ateendees: cacheData.ateendees.map(attendee => {
-        if (attendee.id === attendeeId) {
-          return {
-            ...attendee,
-            checkInDate: null,
-          }
-        }
-        return attendee
+        const isCheckedIn = attendeeIds.includes(attendee.id)
+        return isCheckedIn
+          ? {
+              ...attendee,
+              checkInDate: null,
+            }
+          : attendee
       }),
     })
   }

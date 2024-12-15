@@ -1,5 +1,4 @@
 import {
-  CheckIcon,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -9,31 +8,44 @@ import {
   Search,
 } from 'lucide-react'
 
-import { CheckboxIndicator, CheckboxRoot } from './ui/checkbox'
 import { IconButton } from './ui/button'
-import { Table } from './table/table'
-import { TableHeader } from './table/table-header'
-import { TableCel } from './table/table-cel'
-import { type ChangeEvent, useEffect, useRef, useState } from 'react'
+
+import { type ChangeEvent, useEffect, useState } from 'react'
 
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import ptBR from 'dayjs/locale/pt-br'
-import { DialogTrigger } from './ui/dialog'
+// import { DialogTrigger } from './ui/dialog'
 import { EditAttendee } from './dialogs/attendee-edit-dialog'
 import { getAteendees } from '../http/get-attendee'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { checkinAttendee } from '../http/checkIn-attendee'
-import {
-  ToastDescription,
-  ToastRoot,
-  ToastTitle,
-  ToastViewport,
-} from '../components/ui/toast'
 import { deleteCheckin } from '../http/delete-checkin'
 import { CreateAttendeeDialog } from './dialogs/create-attendee-dialog'
 import { ModelEditDialog } from './dialogs/modal-attendee-edit'
 import { useParams, useSearchParams } from 'react-router-dom'
+import { Button } from './theme/ui/button'
+import { Input } from './theme/ui/input'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './theme/ui/table'
+import { Checkbox } from './theme/ui/checkbox'
+import { toast } from 'sonner'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from './theme/ui/select'
+import { SelectValue } from '@radix-ui/react-select'
+import { DialogTrigger } from './theme/ui/dialog'
 
 dayjs.extend(relativeTime)
 dayjs.locale(ptBR)
@@ -50,10 +62,6 @@ export function AttendeeList({
   onOpenDialog,
   onCloseDialog,
 }: { onOpenDialog: () => void; onCloseDialog: () => void }) {
-  // const [searchParams] = useSearchParams()
-
-  // const eventId = searchParams.get('eventId')
-
   const { eventslug } = useParams() // Captura o parâmetro da URL
 
   // const navigate = useNavigate()
@@ -169,21 +177,6 @@ export function AttendeeList({
 
   const lastPage = Math.ceil(totalAttendee / 10)
 
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
-
-  const handleSelect = (id: number) => {
-    const stringId = id.toString() // Converte o id para string
-    if (selectedIds.includes(stringId)) {
-      setSelectedIds(selectedIds.filter(selectedId => selectedId !== stringId))
-    } else {
-      setSelectedIds([...selectedIds, stringId])
-    }
-  }
-
-  useEffect(() => {
-    console.log('Deletar IDs:', selectedIds)
-  }, [selectedIds])
-
   // const handleDelete = () => {
   //   // Lógica para deletar os itens selecionados
   //   console.log('Deletar IDs:', selectedIds)
@@ -202,9 +195,6 @@ export function AttendeeList({
   //   }
   // }, [isOpen])
 
-  const [toasts, setToasts] = useState<Attendee[]>([]) // Lista de toasts
-  const toastTimers = useRef<Map<number, NodeJS.Timeout>>(new Map())
-
   // useEffect(() => {
   //   console.log(toasts)
   //   const timeout = setTimeout(() => {
@@ -216,46 +206,141 @@ export function AttendeeList({
   //   return () => clearTimeout(timeout)
   // }, [toasts])
 
+  const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set())
+
+  const handleSelectAll = (checked: boolean) => {
+    if (!attendees) return
+
+    const newSelected = checked
+      ? new Set(attendees.map(attendee => attendee.id.toString()))
+      : new Set<string>()
+
+    setSelectedEvents(newSelected)
+    console.log(newSelected)
+  }
+
+  const handleSelectEvent = (attendeeId: string, checked: boolean) => {
+    const newSelected = new Set(selectedEvents)
+
+    if (checked) {
+      newSelected.add(attendeeId)
+    } else {
+      newSelected.delete(attendeeId)
+    }
+
+    setSelectedEvents(newSelected)
+
+    console.log(newSelected)
+  }
+
+  const isAllSelected = attendees?.length
+    ? selectedEvents.size === attendees.length
+    : false
+
+  interface HandelCheckin {
+    attendeeIds: number[]
+    name: string | null | undefined
+  }
+
+  async function handleCheckIn({ attendeeIds, name }: HandelCheckin) {
+    await checkinAttendee(
+      {
+        attendeeIds,
+        slug: eventslug ?? '',
+      },
+      queryClient
+    )
+
+    // if (name !== null && name !== undefined) {
+    //   toast.success('Check-in realizado', {
+    //     description: `${name}`,
+    //     action: {
+    //       label: 'Cancelar',
+    //       onClick: () =>
+    //         deleteCheckin(
+    //           {
+    //             attendeeIds,
+    //             slug: eventslug ?? '',
+    //           },
+    //           queryClient
+    //         ),
+    //     },
+    //     position: 'top-right',
+    //     richColors: false,
+    //   })
+    // }
+
+    if (attendeeIds.length > 1) {
+      toast.success('Check-in em lote com sucesso', {
+        action: {
+          label: 'Cancelar',
+          onClick: () =>
+            deleteCheckin(
+              {
+                attendeeIds,
+                slug: eventslug ?? '',
+              },
+              queryClient
+            ),
+        },
+        position: 'top-right',
+        richColors: false,
+      })
+    } else
+      toast.success('Check-in realizado', {
+        description: `${name}`,
+        action: {
+          label: 'Cancelar',
+          onClick: () =>
+            deleteCheckin(
+              {
+                attendeeIds,
+                slug: eventslug ?? '',
+              },
+              queryClient
+            ),
+        },
+        position: 'top-right',
+        richColors: false,
+      })
+  }
+
+  const [selectedAction, setSelectedAction] = useState<string>('')
+
+  const attendeesToCheckIn = Array.from(selectedEvents)
+    .map(id => Number(id))
+    .filter(id => {
+      const attendee = attendees.find(a => a.id === id)
+      return attendee && attendee.checkInDate === null
+    })
+
+  async function handleApplyAction() {
+    if (selectedAction === 'checkin') {
+      // Filter out attendees that already have check-ins
+
+      if (attendeesToCheckIn.length === 0) {
+        toast.error('Nenhum participante selecionado precisa de check-in')
+        return
+      }
+
+      const name =
+        attendeesToCheckIn.length === 1
+          ? attendees.find(a => a.id === attendeesToCheckIn[0])?.name || null
+          : null
+
+      await handleCheckIn({
+        attendeeIds: attendeesToCheckIn,
+        name,
+      })
+
+      // Clear selections after successful action
+      // setSelectedEvents(new Set())
+      setSelectedAction('')
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
-      {toasts.map(attendee => (
-        <ToastRoot
-          key={attendee.id}
-          open={true}
-          // onOpenChange={setIsOpen}
-          duration={6000}
-        >
-          <ToastTitle>Checkin Realizado</ToastTitle>
-          <ToastDescription>{attendee.name}</ToastDescription>
-          {/* <ToastAction altText="teste" asChild> */}
-          <button
-            type="button"
-            className="text-orange-500 inline-flex h-[30px] items-center justify-center rounded bg-green2 px-2.5 text-xs font-medium leading-[25px] text-green11 shadow-[inset_0_0_0_1px] shadow-green7 hover:shadow-[inset_0_0_0_1px] hover:shadow-green8 focus:shadow-[0_0_0_2px] focus:shadow-green8"
-            onClick={() => {
-              deleteCheckin(
-                {
-                  attendeeId: attendee.id,
-                  slug: eventslug ?? '',
-                },
-                queryClient
-              )
-
-              setToasts(prev => prev.filter(t => t.id !== attendee.id))
-
-              const timer = toastTimers.current.get(attendee.id)
-              if (timer) {
-                clearTimeout(timer)
-                toastTimers.current.delete(attendee.id)
-              }
-            }}
-          >
-            Cancelar
-          </button>
-          {/* </ToastAction> */}
-        </ToastRoot>
-      ))}
-      <ToastViewport />
-
       {/* {attendeeEdit ? <AttendeeEditDialog attendee={attendeeEdit} /> : null} */}
       {editModelOpen === false ? (
         attendeeEdit ? (
@@ -281,18 +366,56 @@ export function AttendeeList({
       )}
 
       <div className="flex gap-3 items-center">
-        <h1 className="text-2xl font-bold">Participantes</h1>
+        <h1 className="text-2xl font-bold text-foreground">Participantes</h1>
 
-        <div className="flex items-center px-3 py-1.5 border border-white/10 bg-transparent rounded-lg text-sm w-72 gap-3">
-          <Search size={16} className="text-emerald-100" />
-          <input
-            className="bg-transparent flex-1 outline-none gap-3"
-            type="text"
+        <div className="flex px-3 py-1.5 items-center gap-3 border border-input rounded-md w-72 focus-within:ring-2 focus-within:ring-ring h-10">
+          <Search size={16} className="text-muted-foreground" />
+
+          <Input
+            className="outline-none border-0 h-full text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 p-0 m-0"
             placeholder="Buscar participante"
             onChange={onSearchInputChanged}
             value={attendeeName}
           />
         </div>
+        {selectedEvents.size > 0 && (
+          <>
+            <Select
+              onValueChange={value => {
+                setSelectedAction(value)
+              }}
+              value={selectedAction}
+            >
+              <SelectTrigger className="w-[210px] text-foreground">
+                <SelectValue placeholder="Ações no participante" />
+              </SelectTrigger>
+              <SelectContent className="text-foreground">
+                <SelectGroup>
+                  <SelectItem value="cancelar">Cancelar</SelectItem>
+                  {attendeesToCheckIn.length >= 1 && (
+                    <SelectItem
+                      value="checkin"
+                      // onSelect={() => {
+                      //   // handleCheckIn({
+                      //   //   attendeeIds: Array.from(selectedEvents).map(id =>
+                      //   //     Number(id)
+                      //   //   ),
+                      //   //   name: 'erick',
+                      //   // })
+                      // }}
+                    >
+                      Fazer checkin
+                    </SelectItem>
+                  )}
+                  <SelectItem value="deletar">Deletar</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            <Button onClick={() => handleApplyAction()}>Aplicar</Button>
+          </>
+        )}
+
         <DialogTrigger
           onClick={() => {
             setEditModelOpen(false)
@@ -301,170 +424,147 @@ export function AttendeeList({
           }}
           asChild
         >
-          <button
-            className="ml-auto flex gap-3 text-zinc-50 text-base bg-[#eb5a0c] px-2.5 py-2 rounded-md justify-center items-center"
-            type="button"
-          >
+          <Button className="ml-auto">
             <Plus size={25} />
             Novo participante
-          </button>
+          </Button>
         </DialogTrigger>
       </div>
 
       {/* Tabela de participantes */}
 
-      <Table className="bg-[#0d0b0a]">
-        <thead>
-          <tr className="border-b border-white/10 h-16">
-            <TableHeader className="w-[48px]">
-              <CheckboxRoot>
-                <CheckboxIndicator>
-                  <CheckIcon size={14} strokeWidth={3} />
-                </CheckboxIndicator>
-              </CheckboxRoot>
-            </TableHeader>
-            <TableHeader>Código</TableHeader>
-            <TableHeader>Participante</TableHeader>
-            <TableHeader>Data de inscrição</TableHeader>
-            <TableHeader>Data do check-in</TableHeader>
-            <TableHeader className="w-[48px]" />
-          </tr>
-        </thead>
-        <tbody>
-          {attendees.map(dataE => {
-            return (
-              <tr
-                key={dataE.id}
-                className="border-b border-white/10 text-zinc-300 hover:bg-zinc-50/5 transition-opacity duration-1000 ease-in-out"
-              >
-                <TableCel>
-                  <CheckboxRoot
-                    onCheckedChange={() => handleSelect(dataE.id)}
-                    // checked={selectedIds.includes(dataE.id.toString())} // Converte o número para string
-                  >
-                    <CheckboxIndicator>
-                      <CheckIcon size={14} strokeWidth={3} />
-                    </CheckboxIndicator>
-                  </CheckboxRoot>
-                </TableCel>
-                <TableCel>{dataE.id}</TableCel>
-                <TableCel>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-zinc-50 font-semibold">
-                      {dataE.name}
-                    </span>
-                    <span>{dataE.email}</span>
-                  </div>
-                </TableCel>
-                <TableCel>{dayjs().to(dataE.createdAt)}</TableCel>
-                <TableCel>
-                  {dataE.checkInDate === null ? (
-                    <span className="text-orange-500/95">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          checkinAttendee(
-                            {
-                              attendeeId: dataE.id,
-                              slug: eventslug ?? '',
-                            },
-                            queryClient
-                          )
-                          // setIsOpen(true)
-                          setToasts(prev => [...prev, dataE])
-
-                          const existingTimeout = toastTimers.current.get(
-                            dataE.id
-                          )
-                          if (existingTimeout) {
-                            clearTimeout(existingTimeout)
+      <div className="border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow className="h-16 border-b hover:bg-inherit">
+              <TableHead className="w-[48px]">
+                <Checkbox
+                  checked={isAllSelected}
+                  onCheckedChange={handleSelectAll}
+                  className="bg-secondary size-5 border-secondary-foreground dark:border-border"
+                />
+              </TableHead>
+              <TableHead>Código</TableHead>
+              <TableHead>Participante</TableHead>
+              <TableHead>Data de inscrição</TableHead>
+              <TableHead>Data do check-in</TableHead>
+              <TableHead className="w-[48px]" />
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {attendees.map(dataE => {
+              return (
+                <TableRow key={dataE.id} className="text-foreground">
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedEvents.has(dataE.id.toString())}
+                      onCheckedChange={checked => {
+                        handleSelectEvent(
+                          dataE.id.toString(),
+                          checked as boolean
+                        )
+                      }}
+                      className="bg-secondary size-5 border-secondary-foreground dark:border-border"
+                    />
+                  </TableCell>
+                  <TableCell>{dataE.id}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1">
+                      <span className="font-semibold">{dataE.name}</span>
+                      <span className="text-muted-foreground">
+                        {dataE.email}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{dayjs().to(dataE.createdAt)}</TableCell>
+                  <TableCell>
+                    {dataE.checkInDate === null ? (
+                      <span className="text-orange-500/95">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleCheckIn({
+                              attendeeIds: [dataE.id],
+                              name: dataE.name,
+                            })
                           }
-
-                          // Cria um novo timeout para remover o toast após 5 segundos
-                          const timeout = setTimeout(() => {
-                            setToasts(prev =>
-                              prev.filter(t => t.id !== dataE.id)
-                            ) // Remove o toast
-                            toastTimers.current.delete(dataE.id) // Remove o timer associado
-                          }, 5000)
-
-                          toastTimers.current.set(dataE.id, timeout) // Salva o novo timer
-                        }}
-                      >
-                        Confirmar check-in
-                      </button>
-                    </span>
-                  ) : (
-                    dayjs().to(dataE.checkInDate)
-                  )}
-                </TableCel>
-                <TableCel>
-                  <DialogTrigger
-                    onClick={event => {
-                      setEditModelOpen(true)
-                      setAttendeeEdit(dataE)
-                      onOpenDialog()
-                      setMenuPosition({
-                        x: event.currentTarget.getBoundingClientRect().left,
-                        y: event.currentTarget.getBoundingClientRect().bottom,
-                      })
-                    }}
-                    asChild
-                  >
-                    <IconButton>
-                      <MoreHorizontal size={16} />
+                        >
+                          Confirmar check-in
+                        </button>
+                      </span>
+                    ) : (
+                      dayjs().to(dataE.checkInDate)
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <DialogTrigger
+                      onClick={event => {
+                        setEditModelOpen(true)
+                        setAttendeeEdit(dataE)
+                        onOpenDialog()
+                        setMenuPosition({
+                          x: event.currentTarget.getBoundingClientRect().left,
+                          y: event.currentTarget.getBoundingClientRect().bottom,
+                        })
+                      }}
+                      asChild
+                    >
+                      <IconButton>
+                        <MoreHorizontal size={16} />
+                      </IconButton>
+                    </DialogTrigger>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+          <TableFooter className="h-16">
+            <TableRow className="text-muted-foreground bg-background hover:bg-background">
+              <TableCell className="py-3 px-4 text-sm" colSpan={3}>
+                Mostrando {attendees.length} de {totalAttendee} itens
+              </TableCell>
+              <TableCell className="text-right" colSpan={3}>
+                <div className="flex items-center justify-end gap-8">
+                  <span>
+                    Página {page} de {lastPage}{' '}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <IconButton
+                      onClick={() => page > 1 && goToInitialPage()}
+                      variant="left"
+                      disabled={page === 1}
+                    >
+                      <ChevronsLeft size={16} />
                     </IconButton>
-                  </DialogTrigger>
-                </TableCel>
-              </tr>
-            )
-          })}
-        </tbody>
-        <tfoot className="">
-          <tr className="text-zinc-300">
-            <TableCel className="py-3 px-4 text-sm" colSpan={3}>
-              Mostrando {attendees.length} de {totalAttendee} itens
-            </TableCel>
-            <TableCel className="text-right" colSpan={3}>
-              <div className="flex items-center justify-end gap-8">
-                <span>
-                  Página {page} de {lastPage}{' '}
-                </span>
-                <div className="flex items-center gap-1.5">
-                  <IconButton
-                    onClick={goToInitialPage}
-                    variant="left"
-                    disabled={page === 1}
-                  >
-                    <ChevronsLeft size={16} />
-                  </IconButton>
-                  <IconButton
-                    onClick={goTolastPage}
-                    variant="left"
-                    disabled={page === 1}
-                  >
-                    <ChevronLeft size={16} />
-                  </IconButton>
-                  <IconButton
-                    onClick={goToNextPage}
-                    variant="right"
-                    disabled={page === lastPage}
-                  >
-                    <ChevronRight size={16} />
-                  </IconButton>
-                  <IconButton
-                    onClick={goToFinalPage}
-                    variant="right"
-                    disabled={page === lastPage}
-                  >
-                    <ChevronsRight size={16} />
-                  </IconButton>
+                    <IconButton
+                      onClick={() => page > 1 && goTolastPage()}
+                      variant="left"
+                      disabled={page === 1}
+                    >
+                      <ChevronLeft size={16} />
+                    </IconButton>
+                    <IconButton
+                      disabled={page === lastPage}
+                      onClick={() => page !== lastPage && goToNextPage()}
+                      variant="right"
+                    >
+                      <ChevronRight size={16} />
+                    </IconButton>
+                    <IconButton
+                      onClick={() => page !== lastPage && goToFinalPage()}
+                      variant="right"
+                      disabled={page === lastPage}
+                    >
+                      <ChevronsRight size={16} />
+                    </IconButton>
+                  </div>
                 </div>
-              </div>
-            </TableCel>
-          </tr>
-        </tfoot>
-      </Table>
+              </TableCell>
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </div>
+
       {/* </div> */}
     </div>
   )

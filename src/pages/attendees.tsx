@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { AttendeeList } from '../components/attendee-list'
 import { Header } from '../components/header'
-import { Dialog } from '../components/ui/dialog'
+// import { Dialog } from '../components/ui/dialog'
 import { ToastProvider } from '../components/ui/toast'
+import { Dialog } from '@/components/theme/ui/dialog'
 
 export function Attendees() {
   const [isOpen, setIsOpen] = useState(false) // Controle do estado de abertura/fechamento

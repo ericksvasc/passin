@@ -57,7 +57,7 @@ export function ModelEditDialog({
 
   return (
     <DialogContent
-      className="w-40 h-24 p-0 rounded-md"
+      className="w-40 h-24 p-0 rounded-md bg-secondary"
       style={{
         top: menuPosition.y - 96 / 2 - 40,
         left: menuPosition.x - 160 / 2 + 30,
@@ -67,16 +67,16 @@ export function ModelEditDialog({
       <div className="flex flex-col h-full justify-center">
         <button
           type="button"
-          className="h-full flex items-center px-4 gap-2 text-green-50"
+          className="h-full flex items-center px-4 gap-2 text-foreground"
           onClick={onOpenEdit}
         >
           <UserRoundPen size={18} />
           Editar
         </button>
-        <span className="w-full border-b border-white/30" />
+        <span className="w-full border-b border-muted-foreground/30" />
         <button
           type="button"
-          className="h-full flex items-center px-4 gap-2 text-red-400"
+          className="h-full flex items-center px-4 gap-2 text-red-400 dark:text-red-500"
         >
           <Trash2 size={18} />
           Deletar

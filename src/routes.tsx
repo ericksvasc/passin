@@ -5,7 +5,7 @@ import { Events } from './pages/events'
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Attendees />,
+    element: <Events />,
   },
   {
     path: '/events',

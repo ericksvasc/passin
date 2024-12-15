@@ -4,15 +4,17 @@ import type { AttendeeResponse } from './get-attendee'
 import dayjs from 'dayjs'
 
 interface PatchAttendee {
-  attendeeId: number
+  attendeeIds: number[]
   slug: string
 }
 
 export async function checkinAttendee(
-  { attendeeId, slug }: PatchAttendee,
+  { attendeeIds, slug }: PatchAttendee,
   queryClient: QueryClient
 ) {
-  await api.get(`/attendees/${slug}/${attendeeId}/check-in`)
+  await api.post(`/attendees/${slug}/check-in`, {
+    attendeeIds,
+  })
 
   const ordersListcache = queryClient.getQueriesData<AttendeeResponse>({
     queryKey: ['attendees'],
@@ -25,16 +27,38 @@ export async function checkinAttendee(
       continue
     }
 
+    // queryClient.setQueryData<AttendeeResponse>(cacheKey, {
+    //   ...cacheData,
+    //   ateendees: cacheData.ateendees.map(attendee => {
+    //     attendeeId.map(id => {
+    //       if (attendee.id === id) {
+    //         return {
+    //           ...attendee,
+    //           checkInDate: dayjs().format(),
+    //         }
+    //       }
+    //     })
+
+    //     // if (attendee.id === attendeeId) {
+    //     //   return {
+    //     //     ...attendee,
+    //     //     checkInDate: dayjs().format(),
+    //     //   }
+    //     // }
+    //     return attendee
+    //   }),
+    // })
+
     queryClient.setQueryData<AttendeeResponse>(cacheKey, {
       ...cacheData,
       ateendees: cacheData.ateendees.map(attendee => {
-        if (attendee.id === attendeeId) {
-          return {
-            ...attendee,
-            checkInDate: dayjs().format(),
-          }
-        }
-        return attendee
+        const isCheckedIn = attendeeIds.includes(attendee.id)
+        return isCheckedIn
+          ? {
+              ...attendee,
+              checkInDate: dayjs().format(),
+            }
+          : attendee
       }),
     })
   }
