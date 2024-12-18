@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form'
-import { boolean, z } from 'zod'
+import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 // import {
 //   DialogClose,
@@ -17,19 +17,18 @@ import {
   DialogDescription,
   DialogTitle,
 } from '../theme/ui/dialog'
-import { generateSlug } from '../functions/create-slug'
+
 import { useEffect, useState } from 'react'
-import { checkSlug } from '@/http/check-slug-'
-import { Ban, CircleCheck, X } from 'lucide-react'
+
 import { Textarea } from '../theme/ui/textarea'
 import InputNumber from '../theme/ui/input-number'
 import { Label } from 'react-aria-components'
+import { createEvent } from '@/http/create-events'
 
 const createEventForm = z.object({
   title: z.string().min(1, 'O titulo é obrigatório'),
   details: z.string(),
   maximumAttendees: z.string(),
-  slug: z.string(),
 })
 
 type CreateEventForm = z.infer<typeof createEventForm>
@@ -45,31 +44,9 @@ const postEvent = z.object({
   title: z.string().min(1, 'O titulo é obrigatório'),
   details: z.string(),
   maximumAttendees: z.number(),
-  slug: z.string(),
 })
 
-type PostEvent = z.infer<typeof postEvent>
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [value, delay])
-
-  return debouncedValue
-}
-
-// {
-//   onOpenDialog,
-//   onCloseDialog,
-// }: { onOpenDialog: () => void; onCloseDialog: () => void }
+// type PostEvent = z.infer<typeof postEvent>
 
 export function CreateEventDialog({
   onCloseDialog,
@@ -77,58 +54,23 @@ export function CreateEventDialog({
 }: AttendeeEditDialogProps) {
   // const delay = 1000
   const [title, setTitle] = useState('')
-  const [formSubmit, setFormSubimit] = useState<boolean>(false)
-  // const [shouldCheckSlug, setShouldCheckSlug] = useState(false)
-  // const [slugWasEdited, setSlugWasEdited] = useState<boolean>(false)
-  // const [slugIsValid, setSlugIsValid] = useState<boolean>(false)
-  // const debouncedTitle = useDebounce(title, delay)
-  // const debouncedSubmit = useDebounce(formSubmit, delay)
-  const [slug, setSlug] = useState('')
-  // const debouncedSlug = useDebounce(slug, delay)
 
-  const queryClient = useQueryClient()
-
-  // const {
-  //   mutateAsync: checkSlugMutate,
-  //   isError: checkSlugError,
-  //   status: slugCheckStatus,
-  //   isPending: checkSlugIsPending,
-  // } = useMutation({
-  //   mutationFn: checkSlug,
-  //   mutationKey: ['slug'],
-  //   onSuccess: () => {
-  //     setFormSubimit(true)
-  //     setSlugIsValid(true)
-  //   },
-  //   onError: () => {
-  //     setFormSubimit(false)
-  //     setSlugIsValid(false)
-  //   },
-  // })
-
-  const { register, handleSubmit, formState, reset, getValues, watch } =
-    useForm<CreateEventForm>({
+  const { register, handleSubmit, formState, reset } = useForm<CreateEventForm>(
+    {
       resolver: zodResolver(createEventForm),
       mode: 'onChange',
       defaultValues: {
         title: title || '',
       },
-    })
+    }
+  )
 
   async function handleCreateEvent(data: CreateEventForm) {
-    // if (data.name === null && data.email === null) {
-    //   return onCloseDialog()
-    // }
-    // const patchData: PostEvent = {
-    //   slug,
-    //   name: data.name,
-    //   email: data.email,
-    // }
-    // await createAttendee(patchData)
-    // const eventslug = slug
-    // queryClient.invalidateQueries({ queryKey: ['attendees', eventslug] })
-    // onCloseDialog()
-    // reset()
+    await createEvent({
+      title,
+      details: data.details,
+      maximumAttendees,
+    })
 
     console.log(data)
   }
@@ -156,7 +98,6 @@ export function CreateEventDialog({
       setTitle('')
       reset({
         title: '',
-        slug: '',
       })
       console.log('resetado')
     }
@@ -203,7 +144,7 @@ export function CreateEventDialog({
   const [maximumAttendees, setMaximumAttendees] = useState<number>(3)
 
   return (
-    <DialogContent className="bg-muted max-w-full w-[800px] min-h-[600px] h-auto">
+    <DialogContent className="bg-muted max-w-full w-[600px] min-h-[600px] h-auto">
       <div className="flex flex-col justify-between h-full text-foreground">
         <DialogTitle className="mb-1">Criar evento</DialogTitle>
         <DialogDescription className="mb-6 text-muted-foreground">
@@ -229,7 +170,7 @@ export function CreateEventDialog({
                   const value = e.target.value
                   setTitle(value)
                 }}
-                className="bg-transparent  dark:border-muted-foreground h-14 placeholder:text-sm md:text-lg "
+                className="bg-transparent  dark:border-muted-foreground h-10 placeholder:text-sm md:text-lg "
               />
 
               {formState.errors.title && (
@@ -258,7 +199,7 @@ export function CreateEventDialog({
               )}
             </div>
 
-            <div className="flex gap-3 items-center">
+            <div className="flex flex-col gap-2.5 w-full">
               <Label className="text-sm font-normal text-foreground">
                 Número máximos de participantes:
               </Label>

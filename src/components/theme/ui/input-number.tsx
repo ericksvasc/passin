@@ -65,26 +65,26 @@ const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>(
           {/* <Label className="text-sm font-normal text-foreground">
             {label}:
           </Label> */}
-          <Group className="flex h-14 w-fit items-center overflow-hidden whitespace-nowrap rounded-lg border border-input dark:border-muted-foreground text-sm shadow-sm shadow-black/5 transition-shadow focus-within:border-input focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+          <Group className="flex gap-2.5 h-10 w-full items-center  text-sm shadow-sm shadow-black/5 transition-shadow disabled:cursor-not-allowed disabled:opacity-50">
             <Button
               slot="decrement"
-              className="-ms-px flex aspect-square h-[inherit] items-center justify-center rounded-s-lg border border-input bg-muted text-sm text-muted-foreground/80 transition-shadow hover:bg-muted-foreground/5 hover:text-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex aspect-square h-[inherit] items-center justify-center rounded-s-lgbg-muted text-sm text-muted-foreground/80 transition-shadow hover:bg-muted-foreground/5 hover:text-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50  border border-input dark:border-muted-foreground"
             >
               <Minus size={16} strokeWidth={2} aria-hidden="true" />
             </Button>
             <Input
-              className="bg-transparent w-full px-3 py-2 text-center tabular-nums text-foreground focus:outline-none md:text-2xl"
+              className="flex h-10  text-center w-full rounded-sm border border-input dark:border-muted-foreground bg-transparent px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
               ref={ref}
               name={name}
               defaultValue={defaultValue}
               {...registration}
-              style={{
-                width: `calc(${maximumAttendeesNumber}ch + 4rem)`,
-              }}
+              // style={{
+              //   width: `calc(${maximumAttendeesNumber}ch + 4rem)`,
+              // }}
             />
             <Button
               slot="increment"
-              className="-me-px flex aspect-square h-[inherit] items-center justify-center rounded-e-lg border border-input bg-muted text-sm text-muted-foreground/80 transition-shadow hover:bg-muted-foreground/5 hover:text-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+              className=" flex aspect-square h-[inherit] items-center justify-center rounded-e-lg bg-muted text-sm text-muted-foreground/80 transition-shadow hover:bg-muted-foreground/5 hover:text-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50   border border-input dark:border-muted-foreground"
             >
               <Plus size={16} strokeWidth={2} aria-hidden="true" />
             </Button>
